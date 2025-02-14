@@ -1,0 +1,10 @@
+version: "2"
+services:
+  dfanalyzer:
+    image: dfanalyzer
+    restart: "no"
+    network_mode: "host"
+    environment:
+      - DFA_URL=http://0.0.0.0
+    working_dir: "/DfAnalyzer"
+    entrypoint: [ "sh", "start-dfanalyzer.sh" ]
