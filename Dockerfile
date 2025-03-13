@@ -7,6 +7,6 @@ RUN pip install -U pip
 RUN pip install nvflare
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-COPY ../dfa-lib-python dfa-lib-python
+COPY dfanalyzer/dfa-lib-python dfa-lib-python
 RUN cd dfa-lib-python && make install
 
