@@ -1,0 +1,7 @@
+import json
+
+
+def get_hash_experiment(file_path):
+    with open(file_path, "r") as f:
+        data = json.load(f)
+    return data["hash_experimento"]

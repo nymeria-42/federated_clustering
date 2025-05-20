@@ -24,6 +24,10 @@ import numpy as np
 
 from nvflare.apis.fl_constant import JobConstants
 
+from utils.helpers import get_hash_experiment
+
+HASH_EXPERIMENT = get_hash_experiment()
+
 JOBS_ROOT = "jobs"
 
 
@@ -35,11 +39,15 @@ class SplitMethod(Enum):
 
 
 def job_config_args_parser():
-    parser = argparse.ArgumentParser(description="generate train configs with data split")
+    parser = argparse.ArgumentParser(
+        description="generate train configs with data split"
+    )
     parser.add_argument("--task_name", type=str, help="Task name for the config")
     parser.add_argument("--data_path", type=str, help="Path to data file")
     parser.add_argument("--site_num", type=int, help="Total number of sites")
-    parser.add_argument("--site_name_prefix", type=str, default="site-", help="Site name prefix")
+    parser.add_argument(
+        "--site_name_prefix", type=str, default="site-", help="Site name prefix"
+    )
     parser.add_argument(
         "--data_size",
         type=int,
@@ -101,7 +109,9 @@ def assign_data_index_to_sites(
     split_method: SplitMethod = SplitMethod.UNIFORM,
 ) -> dict:
     if valid_fraction > 1.0:
-        raise ValueError("validation percent should be less than or equal to 100% of the total data")
+        raise ValueError(
+            "validation percent should be less than or equal to 100% of the total data"
+        )
     elif valid_fraction < 1.0:
         valid_size = int(round(data_size * valid_fraction, 0))
         train_size = data_size - valid_size
@@ -145,12 +155,16 @@ def split_data(
     size_total_file = get_file_line_count(data_path)
     if data_size > 0:
         if data_size > size_total_file:
-            raise ValueError("data_size should be less than or equal to the true data size")
+            raise ValueError(
+                "data_size should be less than or equal to the true data size"
+            )
         else:
             size_total = data_size
     else:
         size_total = size_total_file
-    site_indices = assign_data_index_to_sites(size_total, valid_frac, site_num, site_name_prefix, split_method)
+    site_indices = assign_data_index_to_sites(
+        size_total, valid_frac, site_num, site_name_prefix, split_method
+    )
     return site_indices
 
 
@@ -195,7 +209,6 @@ def _update_client_config(config: dict, args, site_name: str, site_indices):
     config["components"][0]["args"]["client_id"] = int(site_name.split("-")[-1])
 
 
-
 def _update_server_config(config: dict, args):
     config["min_clients"] = args.site_num
 
@@ -210,7 +223,9 @@ def _copy_custom_files(src_job_path, src_app_name, dst_job_path, dst_app_name):
 
 def create_server_app(src_job_path, src_app_name, dst_job_path, site_name, args):
     dst_app_name = f"app_{site_name}"
-    server_config = _read_json(src_job_path / src_app_name / "config" / JobConstants.SERVER_JOB_CONFIG)
+    server_config = _read_json(
+        src_job_path / src_app_name / "config" / JobConstants.SERVER_JOB_CONFIG
+    )
     dst_config_path = dst_job_path / dst_app_name / "config"
 
     # make target config folders
@@ -225,9 +240,13 @@ def create_server_app(src_job_path, src_app_name, dst_job_path, site_name, args)
     _copy_custom_files(src_job_path, src_app_name, dst_job_path, dst_app_name)
 
 
-def create_client_app(src_job_path, src_app_name, dst_job_path, site_name, site_indices, args):
+def create_client_app(
+    src_job_path, src_app_name, dst_job_path, site_name, site_indices, args
+):
     dst_app_name = f"app_{site_name}"
-    client_config = _read_json(src_job_path / src_app_name / "config" / JobConstants.CLIENT_JOB_CONFIG)
+    client_config = _read_json(
+        src_job_path / src_app_name / "config" / JobConstants.CLIENT_JOB_CONFIG
+    )
     dst_config_path = dst_job_path / dst_app_name / "config"
 
     # make target config folders
@@ -269,7 +288,6 @@ def main():
     t2 = Task(2, dataflow_tag, "JobConfig")
     t2.begin()
     start = perf_counter()
-    
 
     # create a new job
     dst_job_path = pathlib.Path(JOBS_ROOT) / job_name
@@ -292,7 +310,9 @@ def main():
     )
 
     # get num_rounds from the server config
-    server_config = _read_json(dst_job_path / "app_server" / "config" / JobConstants.SERVER_JOB_CONFIG)
+    server_config = _read_json(
+        dst_job_path / "app_server" / "config" / JobConstants.SERVER_JOB_CONFIG
+    )
     args.num_rounds = server_config["num_rounds"]
 
     # generate data split
@@ -315,13 +335,23 @@ def main():
             args=args,
         )
 
-
-    to_dfanalyzer = [args.task_name, args.data_path, args.site_num, args.site_name_prefix, args.data_size, args.valid_frac, args.split_method, args.num_rounds]
+    to_dfanalyzer = [
+        HASH_EXPERIMENT,
+        args.task_name,
+        args.data_path,
+        args.site_num,
+        args.site_name_prefix,
+        args.data_size,
+        args.valid_frac,
+        args.split_method,
+        args.num_rounds,
+    ]
     t2_input = DataSet("iJobConfig", [Element(to_dfanalyzer)])
     t2.add_dataset(t2_input)
     t2_output = DataSet("oJobConfig", [Element([])])
     t2.add_dataset(t2_output)
     t2.end()
-    
+
+
 if __name__ == "__main__":
     main()

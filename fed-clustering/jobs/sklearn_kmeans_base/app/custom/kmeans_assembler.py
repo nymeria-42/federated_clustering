@@ -35,9 +35,12 @@ from dfa_lib_python.task_status import TaskStatus
 from dfa_lib_python.extractor_extension import ExtractorExtension
 from time import perf_counter
 
+from utils.helpers import get_hash_experiment
+
+HASH_EXPERIMENT = get_hash_experiment()
+
 dataflow_tag = "nvidiaflare-df"
 
-    
 
 class KMeansAssembler(Assembler):
     def __init__(self):
@@ -51,15 +54,19 @@ class KMeansAssembler(Assembler):
 
     def get_model_params(self, dxo: DXO):
 
-        t6 = Task(6 + 4 * (self.current_round) , dataflow_tag, "GetModelParams",
-                  dependency=Task(
-            5 + 4 * (self.current_round), dataflow_tag, "ClientTraining"
-            ))
+        t6 = Task(
+            6 + 4 * (self.current_round),
+            dataflow_tag,
+            "GetModelParams",
+            dependency=Task(
+                5 + 4 * (self.current_round), dataflow_tag, "ClientTraining"
+            ),
+        )
         t6.begin()
         start = perf_counter()
         data = dxo.data
 
-        to_dfanalyzer = [data["center"], data["count"]]
+        to_dfanalyzer = [HASH_EXPERIMENT, data["center"], data["count"]]
         t6_input = DataSet("iGetModelParams", [Element(to_dfanalyzer)])
         t6.add_dataset(t6_input)
         t6_output = DataSet("oGetModelParams", [Element([])])
@@ -71,10 +78,12 @@ class KMeansAssembler(Assembler):
     def assemble(self, data: Dict[str, dict], fl_ctx: FLContext) -> DXO:
         current_round = fl_ctx.get_prop(AppConstants.CURRENT_ROUND)
         n_feature = 0
-        t8 = Task(7 + 4 * (current_round), dataflow_tag, "Assemble",
-                dependency=Task(
-            6 + 4 * (current_round), dataflow_tag, "GetModelParams"
-            ))
+        t8 = Task(
+            7 + 4 * (current_round),
+            dataflow_tag,
+            "Assemble",
+            dependency=Task(6 + 4 * (current_round), dataflow_tag, "GetModelParams"),
+        )
         t8.begin()
         start = perf_counter()
         kmeans_time = 0
@@ -100,10 +109,14 @@ class KMeansAssembler(Assembler):
             # Mini-batch k-Means step to assemble the received centers
             start_kmeans = perf_counter()
             for center_idx in range(self.n_cluster):
-                centers_global_rescale = self.center[center_idx] * self.count[center_idx]
+                centers_global_rescale = (
+                    self.center[center_idx] * self.count[center_idx]
+                )
                 # Aggregate center, add new center to previous estimate, weighted by counts
                 for _, record in self.collection.items():
-                    centers_global_rescale += record["center"][center_idx] * record["count"][center_idx]
+                    centers_global_rescale += (
+                        record["center"][center_idx] * record["count"][center_idx]
+                    )
                     self.count[center_idx] += record["count"][center_idx]
                 # Rescale to compute mean of all points (old and new combined)
                 alpha = 1 / self.count[center_idx]
@@ -112,12 +125,14 @@ class KMeansAssembler(Assembler):
                 self.center[center_idx] = centers_global_rescale
             kmeans_time = perf_counter() - start_kmeans
 
-        
         assembling_time = perf_counter() - start
-        to_dfanalyzer = [current_round, n_feature, self.n_cluster]
+        to_dfanalyzer = [HASH_EXPERIMENT, current_round, n_feature, self.n_cluster]
         t8_input = DataSet("iAssemble", [Element(to_dfanalyzer)])
         t8.add_dataset(t8_input)
-        t8_output = DataSet("oAssemble", [Element([self.center, self.count, assembling_time, kmeans_time])])
+        t8_output = DataSet(
+            "oAssemble",
+            [Element([self.center, self.count, assembling_time, kmeans_time])],
+        )
         t8.add_dataset(t8_output)
         t8.end()
         params = {"center": self.center}

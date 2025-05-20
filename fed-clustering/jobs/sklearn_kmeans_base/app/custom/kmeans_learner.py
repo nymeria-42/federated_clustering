@@ -35,9 +35,17 @@ from dfa_lib_python.task_status import TaskStatus
 from dfa_lib_python.extractor_extension import ExtractorExtension
 from dfa_lib_python.dependency import Dependency
 
+from utils.helpers import get_hash_experiment
+
 from time import perf_counter
-from pathlib import Path    
+
+from pathlib import Path
+
+HASH_EXPERIMENT = get_hash_experiment()
+
 dataflow_tag = "nvidiaflare-df"
+
+
 class KMeansLearner(Learner):
     def __init__(
         self,
@@ -73,18 +81,21 @@ class KMeansLearner(Learner):
         t3 = Task(3, dataflow_tag, "LoadData")
         t3.begin()
         start = perf_counter()
-        train_data = load_data_for_range(self.data_path, self.train_start, self.train_end)
-        valid_data = load_data_for_range(self.data_path, self.valid_start, self.valid_end)
+        train_data = load_data_for_range(
+            self.data_path, self.train_start, self.train_end
+        )
+        valid_data = load_data_for_range(
+            self.data_path, self.valid_start, self.valid_end
+        )
 
         duration = perf_counter() - start
 
-        to_dfanalyzer = [self.client_id, duration]
+        to_dfanalyzer = [HASH_EXPERIMENT, self.client_id, duration]
         t3_input = DataSet("iLoadData", [Element(to_dfanalyzer)])
         t3.add_dataset(t3_input)
         t3_output = DataSet("oLoadData", [Element([])])
         t3.add_dataset(t3_output)
         t3.end()
-
 
         return {"train": train_data, "valid": valid_data}
 
@@ -100,7 +111,7 @@ class KMeansLearner(Learner):
         start = perf_counter()
         duration = perf_counter() - start
 
-        to_dfanalyzer = [self.client_id, self.n_samples, duration]
+        to_dfanalyzer = [HASH_EXPERIMENT, self.client_id, self.n_samples, duration]
         t4_input = DataSet("iInitializeClient", [Element(to_dfanalyzer)])
         t4.add_dataset(t4_input)
         t4_output = DataSet("oInitializeClient", [Element([])])
@@ -109,11 +120,10 @@ class KMeansLearner(Learner):
         # note that the model needs to be created every round
         # due to the available API for center initialization
 
-    def train(self, curr_round: int, global_param: Optional[dict], fl_ctx: FLContext) -> Tuple[dict, dict]:
-        t5 = Task(5 + 4 * (curr_round), 
-            dataflow_tag, 
-            "ClientTraining"
-        )
+    def train(
+        self, curr_round: int, global_param: Optional[dict], fl_ctx: FLContext
+    ) -> Tuple[dict, dict]:
+        t5 = Task(5 + 4 * (curr_round), dataflow_tag, "ClientTraining")
         if curr_round == 0:
             t5.add_dependency(
                 Dependency(
@@ -132,6 +142,7 @@ class KMeansLearner(Learner):
         t5.begin()
         start = perf_counter()
         to_dfanalyzer = [
+            HASH_EXPERIMENT,
             self.client_id,
             curr_round,
             self.n_clusters,
@@ -139,12 +150,12 @@ class KMeansLearner(Learner):
             self.max_iter,
             self.n_init,
             self.reassignment_ratio,
-            self.random_state
+            self.random_state,
         ]
-   
+
         t5_input = DataSet("iClientTraining", [Element(to_dfanalyzer)])
         t5.add_dataset(t5_input)
-        
+
         # get training data, note that clustering is unsupervised
         # so only x_train will be used
         count_local = None
@@ -155,7 +166,9 @@ class KMeansLearner(Learner):
             # first round, compute initial center with kmeans++ method
             # model will be None for this round
             self.n_clusters = global_param["n_clusters"]
-            center_local, _ = kmeans_plusplus(x_train, n_clusters=self.n_clusters, random_state=self.random_state)
+            center_local, _ = kmeans_plusplus(
+                x_train, n_clusters=self.n_clusters, random_state=self.random_state
+            )
             kmeans = None
             params = {"center": center_local, "count": None}
         else:
@@ -178,6 +191,7 @@ class KMeansLearner(Learner):
         duration = perf_counter() - start
 
         to_dfanalyzer = [
+            HASH_EXPERIMENT,
             self.client_id,
             curr_round,
             center_local,
@@ -185,23 +199,25 @@ class KMeansLearner(Learner):
             center_global,
             duration,
         ]
-   
+
         t5_output = DataSet("oClientTraining", [Element(to_dfanalyzer)])
         t5.add_dataset(t5_output)
         t5.end()
 
         return params, kmeans
 
-    def validate(self, curr_round: int, global_param: Optional[dict], fl_ctx: FLContext) -> Tuple[dict, dict]:
+    def validate(
+        self, curr_round: int, global_param: Optional[dict], fl_ctx: FLContext
+    ) -> Tuple[dict, dict]:
         # local validation with global center
         # fit a standalone KMeans with just the given center
 
-        t7 = Task(8 + 4 * (curr_round), 
-                  dataflow_tag, 
-                  "ClientValidation",
-                  dependency=Task(
-                7 + 4 * (curr_round), dataflow_tag, "Assemble"
-            ))
+        t7 = Task(
+            8 + 4 * (curr_round),
+            dataflow_tag,
+            "ClientValidation",
+            dependency=Task(7 + 4 * (curr_round), dataflow_tag, "Assemble"),
+        )
         t7.begin()
         start = perf_counter()
 
@@ -216,7 +232,7 @@ class KMeansLearner(Learner):
         metrics = {"Silhouette Score": silhouette}
 
         duration = perf_counter() - start
-        to_dfanalyzer = [self.client_id, curr_round, silhouette ]
+        to_dfanalyzer = [HASH_EXPERIMENT, self.client_id, curr_round, silhouette]
         t7_input = DataSet("iClientValidation", [Element(to_dfanalyzer)])
         t7.add_dataset(t7_input)
         t7_output = DataSet("oClientValidation", [Element([])])
@@ -229,13 +245,12 @@ class KMeansLearner(Learner):
         # get round
         curr_round = fl_ctx.get_prop(AppConstants.CURRENT_ROUND)
 
-
-        t9 = Task(9 + 4 * (curr_round), 
-                  dataflow_tag, 
-                  "FinalizeClient",
-                  dependency=Task(
-                8 + 4 * (curr_round), dataflow_tag, "ClientValidation"
-            ))
+        t9 = Task(
+            9 + 4 * (curr_round),
+            dataflow_tag,
+            "FinalizeClient",
+            dependency=Task(8 + 4 * (curr_round), dataflow_tag, "ClientValidation"),
+        )
         t9.begin()
         start = perf_counter()
         del self.train_data
@@ -243,7 +258,7 @@ class KMeansLearner(Learner):
         self.log_info(fl_ctx, "Freed training resources")
 
         duration = perf_counter() - start
-        to_dfanalyzer = [self.client_id, duration ]
+        to_dfanalyzer = [HASH_EXPERIMENT, self.client_id, duration]
         t9_output = DataSet("oFinalizeClient", [Element(to_dfanalyzer)])
         t9.add_dataset(t9_output)
         t9.end()
