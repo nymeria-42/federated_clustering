@@ -7,11 +7,11 @@ import json
 
 
 CONFIG_PATHS = [
-    "../jobs/sklearn_kmeans_base/app/config/config_fed_server.json",
-    "../jobs/sklearn_kmeans_base/app/config/config_fed_client.json",
+    "./jobs/sklearn_kmeans_base/app/config/config_fed_server.json",
+    "./jobs/sklearn_kmeans_base/app/config/config_fed_client.json",
 ]
 
-WORKTREE_DIR = Path("../experimentos")  # onde as worktrees vão ficar
+WORKTREE_DIR = Path("./experimentos")  # onde as worktrees vão ficar
 
 
 def gerar_hash(conteudo: str, usuario_git: str, timestamp: str) -> str:
@@ -65,7 +65,7 @@ def salvar_info_local(
     worktree_path: Path, hash_valor: str, usuario: str, timestamp: str
 ):
     info = {"usuario": usuario, "timestamp": timestamp, "hash_experimento": hash_valor}
-    info_path = worktree_path / "fed_clustering/experiment_info.json"
+    info_path = worktree_path / "fed-clustering/experiment_info.json"
     with open(info_path, "w") as f:
         json.dump(info, f, indent=4)
     print(f"Arquivo de info salvo em: {info_path}")

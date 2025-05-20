@@ -35,13 +35,10 @@ from dfa_lib_python.task_status import TaskStatus
 from dfa_lib_python.extractor_extension import ExtractorExtension
 from dfa_lib_python.dependency import Dependency
 
-from utils.helpers import get_hash_experiment
-
 from time import perf_counter
 
 from pathlib import Path
 
-HASH_EXPERIMENT = get_hash_experiment()
 
 dataflow_tag = "nvidiaflare-df"
 
@@ -55,6 +52,7 @@ class KMeansLearner(Learner):
         valid_start: int,
         valid_end: int,
         client_id: int,
+        # hash_experiment: str,
         random_state: int = None,
         max_iter: int = 1,
         n_init: int = 1,
@@ -76,6 +74,7 @@ class KMeansLearner(Learner):
         self.valid_data = None
         self.n_samples = None
         self.n_clusters = None
+        self.hash_experiment = 0
 
     def load_data(self) -> dict:
         t3 = Task(3, dataflow_tag, "LoadData")
@@ -90,7 +89,7 @@ class KMeansLearner(Learner):
 
         duration = perf_counter() - start
 
-        to_dfanalyzer = [HASH_EXPERIMENT, self.client_id, duration]
+        to_dfanalyzer = [self.hash_experiment, self.client_id, duration]
         t3_input = DataSet("iLoadData", [Element(to_dfanalyzer)])
         t3.add_dataset(t3_input)
         t3_output = DataSet("oLoadData", [Element([])])
@@ -111,7 +110,7 @@ class KMeansLearner(Learner):
         start = perf_counter()
         duration = perf_counter() - start
 
-        to_dfanalyzer = [HASH_EXPERIMENT, self.client_id, self.n_samples, duration]
+        to_dfanalyzer = [self.hash_experiment, self.client_id, self.n_samples, duration]
         t4_input = DataSet("iInitializeClient", [Element(to_dfanalyzer)])
         t4.add_dataset(t4_input)
         t4_output = DataSet("oInitializeClient", [Element([])])
@@ -142,7 +141,7 @@ class KMeansLearner(Learner):
         t5.begin()
         start = perf_counter()
         to_dfanalyzer = [
-            HASH_EXPERIMENT,
+            self.hash_experiment,
             self.client_id,
             curr_round,
             self.n_clusters,
@@ -191,7 +190,7 @@ class KMeansLearner(Learner):
         duration = perf_counter() - start
 
         to_dfanalyzer = [
-            HASH_EXPERIMENT,
+            self.hash_experiment,
             self.client_id,
             curr_round,
             center_local,
@@ -232,7 +231,7 @@ class KMeansLearner(Learner):
         metrics = {"Silhouette Score": silhouette}
 
         duration = perf_counter() - start
-        to_dfanalyzer = [HASH_EXPERIMENT, self.client_id, curr_round, silhouette]
+        to_dfanalyzer = [self.hash_experiment, self.client_id, curr_round, silhouette]
         t7_input = DataSet("iClientValidation", [Element(to_dfanalyzer)])
         t7.add_dataset(t7_input)
         t7_output = DataSet("oClientValidation", [Element([])])
@@ -258,7 +257,7 @@ class KMeansLearner(Learner):
         self.log_info(fl_ctx, "Freed training resources")
 
         duration = perf_counter() - start
-        to_dfanalyzer = [HASH_EXPERIMENT, self.client_id, duration]
+        to_dfanalyzer = [self.hash_experiment, self.client_id, duration]
         t9_output = DataSet("oFinalizeClient", [Element(to_dfanalyzer)])
         t9.add_dataset(t9_output)
         t9.end()

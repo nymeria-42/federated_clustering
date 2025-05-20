@@ -35,9 +35,6 @@ from dfa_lib_python.task_status import TaskStatus
 from dfa_lib_python.extractor_extension import ExtractorExtension
 from time import perf_counter
 
-from utils.helpers import get_hash_experiment
-
-HASH_EXPERIMENT = get_hash_experiment()
 
 dataflow_tag = "nvidiaflare-df"
 
@@ -51,6 +48,7 @@ class KMeansAssembler(Assembler):
         self.count = None
         self.n_cluster = 0
         self.current_round = 0
+        self.hash_experiment = 0
 
     def get_model_params(self, dxo: DXO):
 
@@ -63,10 +61,9 @@ class KMeansAssembler(Assembler):
             ),
         )
         t6.begin()
-        start = perf_counter()
         data = dxo.data
 
-        to_dfanalyzer = [HASH_EXPERIMENT, data["center"], data["count"]]
+        to_dfanalyzer = [self.hash_experiment, data["center"], data["count"]]
         t6_input = DataSet("iGetModelParams", [Element(to_dfanalyzer)])
         t6.add_dataset(t6_input)
         t6_output = DataSet("oGetModelParams", [Element([])])
@@ -126,12 +123,12 @@ class KMeansAssembler(Assembler):
             kmeans_time = perf_counter() - start_kmeans
 
         assembling_time = perf_counter() - start
-        to_dfanalyzer = [HASH_EXPERIMENT, current_round, n_feature, self.n_cluster]
+        to_dfanalyzer = [self.hash_experiment, current_round, n_feature, self.n_cluster]
         t8_input = DataSet("iAssemble", [Element(to_dfanalyzer)])
         t8.add_dataset(t8_input)
         t8_output = DataSet(
             "oAssemble",
-            [Element([self.center, self.count, assembling_time, kmeans_time])],
+            [Element([self.hash_experiment, self.center, self.count, assembling_time, kmeans_time])],
         )
         t8.add_dataset(t8_output)
         t8.end()
