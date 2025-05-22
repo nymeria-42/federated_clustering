@@ -39,18 +39,33 @@ DfAnalyzer is a library designed to capture provenance data, which includes:
 ### Setting Up DfAnalyzer
 1. Load the DfAnalyzer Docker image:
    ```bash
-   docker load < dfanalyzer_image.tar.gz
+      docker pull nymeria0042/dfanalyzer   
    ```
 2. Deploy the DfAnalyzer container:
    ```bash
-   docker compose up dfanalyzer
+   cd dfanalyzer && docker compose up dfanalyzer
    ```
 3. Ensure DfAnalyzer is running in the background before starting experiments.
 
 ---
 
-## NVFlare Provisioning
+## Federated Learning with NVFlare
 NVFlare is used to set up the federated learning infrastructure.
+
+### Setting up NVFLARE
+
+```bash
+docker build -t nvflare-service .
+```
+
+## Running the Experiment
+From `fed-clustering folder`.
+
+### 1. Preparing Data and Configuration
+```bash
+./prepare_data.sh
+./prepare_job_config.sh
+```
 
 ### Provisioning
 Run:
@@ -70,23 +85,16 @@ workspace
     │   └── compose.yaml
     └── resources
 ```
+Copy manually `workspace/fed_clustering/prod_00/.env` and `workspace/fed_clustering/prod_00/compoose.yaml` to the new `workspace/fed_clustering/prod_01` folder 
 
+---
 ### Running NVFlare
-Navigate to `prod_00` and launch FL components:
+Navigate to `prod_01` and launch FL components:
 ```bash
 docker compose up
 ```
 
----
-
-## Running the Experiment
-
-### 1. Preparing Data and Configuration
-```bash
-./prepare_data.sh
-./prepare_job_config.sh
-```
-Manually copy `sklearn_2_uniform` to `workspace/fed_clustering/prod_00/admin@nvidia.com/startup/transfer/`.
+Manually copy `jobs/sklearn_2_uniform` to `workspace/fed_clustering/prod_01/admin@nvidia.com/transfer/`.
 
 ### 2. Distributing Data to Clients
 Create dataset folders inside the containers:
@@ -99,17 +107,8 @@ docker cp /tmp/nvflare/dataset/des.csv site-1:/tmp/nvflare/dataset
 ```
 Repeat for all sites.
 
-### 3. Running the FL Server
-Inside `prod_00`, start the FL admin panel:
-```bash
-./admin@nvidia.com/startup/fl_admin.sh
-```
-Log in with:
-```
-admin@nvidia.com
-```
 
-### 4. Configuring the Hosts File
+### 3. Configuring the Hosts File
 1. Get the local hostname:
    ```bash
    hostname -I | awk '{print $1}'
@@ -120,8 +119,18 @@ admin@nvidia.com
    ```
    Add:
    ```
-   {IP}  server server1 overseer
+   {IP} server1 overseer
    ```
+
+### 4. Running the FL Server
+Inside `prod_00`, start the FL admin panel:
+```bash
+./admin@nvidia.com/startup/fl_admin.sh
+```
+Log in with:
+```
+admin@nvidia.com
+```
 
 ### 5. Checking FL System Status
 ```bash
@@ -132,6 +141,7 @@ check_status [server|client]
 ```bash
 submit_job sklearn_kmeans_2_uniform
 ```
+
 Monitor DfAnalyzer for provenance tracking.
 
 ---
