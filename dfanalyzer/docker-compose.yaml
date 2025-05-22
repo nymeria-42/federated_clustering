@@ -1,7 +1,7 @@
-version: "2"
 services:
   dfanalyzer:
     image: nymeria0042/dfanalyzer
+    container_name: dfanalyzer
     restart: "no"
     network_mode: "host"
     environment:
