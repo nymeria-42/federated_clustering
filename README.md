@@ -47,28 +47,53 @@ DfAnalyzer is a library designed to capture provenance data, which includes:
    ```
 3. Ensure DfAnalyzer is running in the background before starting experiments.
 
+4. Run the prospective provenance script:
+   ```bash
+   python fed-clustering/utils/prospective_provenance.py
+   ```
+   
+   - Responsible for capturing and recording metadata about the design and configuration of the experiments before the runs.
+
 ---
 
 ## Federated Learning with NVFlare
 NVFlare is used to set up the federated learning infrastructure.
 
 ### Setting up NVFLARE
-
+- Build the NVFlare image
 ```bash
 docker build -t nvflare-service .
+```
+
+- Create and activate a virtualenv with python=3.8
+```bash
+virtualenv venv --python=3.8
+. venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ## Running the Experiment
 From `fed-clustering folder`.
 
-### 1. Preparing Data and Configuration
+### Prepare experiment
 ```bash
-./prepare_data.sh
-./prepare_job_config.sh
+source start_experiment.sh
+```
+
+- If versioning_control is enabled in `utils/start_experiment.py`, a new branch is created under the `experimentos/` folder, named with the user and the experiment’s start timestamp. A hash is generated and stored in `experiment_info.json`. Additionally, a commit is created containing this hash. The hash can be used to query the provenance database for records related exclusively to that experiment.
+
+- If versioning_control is disabled, the experiment runs in the current folder and branch without creating a new branch or commit. Nonetheless, a hash is still generated and stored in `experiment_info.json`, enabling tracking and querying in the provenance database.
+
+- Remember to reactivate the virtual environment
+
+### Preparing Data and Configuration
+```bash
+source prepare_data.sh
+source prepare_job_config.sh
 ```
 
 ### Provisioning
-Run:
+- Run:
 ```bash
 nvflare provision
 ```
@@ -76,7 +101,7 @@ This creates a `workspace/fed_clustering` directory with the following structure
 ```
 workspace
 └── fed_clustering
-    ├── prod_00
+    ├── prod_01
     │   ├── admin@nvidia.com
     │   ├── server1
     │   ├── site-1
@@ -85,30 +110,30 @@ workspace
     │   └── compose.yaml
     └── resources
 ```
-Copy manually `workspace/fed_clustering/prod_00/.env` and `workspace/fed_clustering/prod_00/compoose.yaml` to the new `workspace/fed_clustering/prod_01` folder 
+- Manually copy `workspace/fed_clustering/prod_00/.env` and `workspace/fed_clustering/prod_00/compoose.yaml` to the new `workspace/fed_clustering/prod_01/` folder 
 
 ---
 ### Running NVFlare
-Navigate to `prod_01` and launch FL components:
+- Navigate to `prod_01` and launch FL components:
 ```bash
 docker compose up
 ```
 
-Manually copy `jobs/sklearn_2_uniform` to `workspace/fed_clustering/prod_01/admin@nvidia.com/transfer/`.
+- Manually copy `jobs/sklearn_2_uniform` to `workspace/fed_clustering/prod_01/admin@nvidia.com/transfer/`.
 
-### 2. Distributing Data to Clients
-Create dataset folders inside the containers:
+### Distributing Data to Clients
+- Create dataset folders inside the containers:
 ```bash
 docker exec -it site-1 mkdir -p /tmp/nvflare/dataset
 ```
-Copy data to each client:
+- Copy data to each client:
 ```bash
 docker cp /tmp/nvflare/dataset/des.csv site-1:/tmp/nvflare/dataset
 ```
-Repeat for all sites.
+- Repeat for all sites.
 
 
-### 3. Configuring the Hosts File
+### Configuring the Hosts File
 1. Get the local hostname:
    ```bash
    hostname -I | awk '{print $1}'
@@ -122,8 +147,8 @@ Repeat for all sites.
    {IP} server1 overseer
    ```
 
-### 4. Running the FL Server
-Inside `prod_00`, start the FL admin panel:
+### Running the FL Server
+Inside `prod_01`, start the FL admin panel:
 ```bash
 ./admin@nvidia.com/startup/fl_admin.sh
 ```
@@ -132,18 +157,29 @@ Log in with:
 admin@nvidia.com
 ```
 
-### 5. Checking FL System Status
+#### Checking FL System Status
 ```bash
 check_status [server|client]
 ```
 
-### 6. Submitting and Running the Experiment
+### Submitting and Running the Experiment
 ```bash
 submit_job sklearn_kmeans_2_uniform
 ```
 
-Monitor DfAnalyzer for provenance tracking.
+### Monitor DfAnalyzer for provenance tracking.
+#### Query the provenance database
+```bash 
+docker exec -it dfanalyzer mclient -u monetdb -d dataflow_analyzer
+```
 
+The default password is `monetdb`.
+
+Then, we can submit the queries, like:
+
+```SQL
+SELECT client_id, silhouette_score FROM iClientValidation WHERE experiment_id = {hash_experiment};
+```
 ---
 
 ## Conclusion
