@@ -7,7 +7,7 @@ if [ -f "$DATASET_PATH" ]; then
     echo "${DATASET_PATH} exists."
 else
     python3 "${script_dir}"/utils/prepare_data.py \
-        --input_csv des.csv \
+        --input_csv /home/nymeria/federated_clustering/fed-clustering/des.csv \
         --randomize 1 \
         --out_path ${DATASET_PATH}
     echo "Data loaded and saved in ${DATASET_PATH}"

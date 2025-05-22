@@ -213,8 +213,7 @@ def _update_client_config(config: dict, args, site_name: str, site_indices):
 
 def _update_server_config(config: dict, args):
     config["min_clients"] = args.site_num
-    config["hash_experiment"] = HASH_EXPERIMENT
-
+    config["components"][3]["args"]["hash_experiment"] = HASH_EXPERIMENT
 
 
 def _copy_custom_files(src_job_path, src_app_name, dst_job_path, dst_app_name):

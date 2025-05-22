@@ -40,7 +40,7 @@ dataflow_tag = "nvidiaflare-df"
 
 
 class KMeansAssembler(Assembler):
-    def __init__(self):
+    def __init__(self, hash_experiment: str):
         super().__init__(data_kind=DataKind.WEIGHTS)
         # Aggregator needs to keep record of historical
         # center and count information for mini-batch kmeans
@@ -48,7 +48,7 @@ class KMeansAssembler(Assembler):
         self.count = None
         self.n_cluster = 0
         self.current_round = 0
-        self.hash_experiment = 0
+        self.hash_experiment = hash_experiment
 
     def get_model_params(self, dxo: DXO):
 

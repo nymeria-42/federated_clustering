@@ -52,7 +52,7 @@ class KMeansLearner(Learner):
         valid_start: int,
         valid_end: int,
         client_id: int,
-        # hash_experiment: str,
+        hash_experiment: str,
         random_state: int = None,
         max_iter: int = 1,
         n_init: int = 1,
@@ -74,7 +74,7 @@ class KMeansLearner(Learner):
         self.valid_data = None
         self.n_samples = None
         self.n_clusters = None
-        self.hash_experiment = 0
+        self.hash_experiment = hash_experiment
 
     def load_data(self) -> dict:
         t3 = Task(3, dataflow_tag, "LoadData")
