@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from utils.helpers import get_hash_experiment
+from helpers import get_hash_experiment
 
 HASH_EXPERIMENT = get_hash_experiment()
 
