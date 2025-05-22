@@ -65,6 +65,7 @@ def salvar_info_local(
     worktree_path: Path, hash_valor: str, usuario: str, timestamp: str
 ):
     info = {"usuario": usuario, "timestamp": timestamp, "hash_experimento": hash_valor}
+    print(worktree_path)
     info_path = worktree_path / "fed-clustering/experiment_info.json"
     with open(info_path, "w") as f:
         json.dump(info, f, indent=4)
@@ -84,6 +85,8 @@ def criar_commit_no_experimento(worktree_path: Path, hash_valor: str):
 
 
 if __name__ == "__main__":
+    versioning_control = True 
+
     usuario = obter_usuario_git()
     timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%S")
     conteudo_config = ler_conteudo_arquivos()
@@ -91,9 +94,14 @@ if __name__ == "__main__":
 
     print(f"Hash do experimento: {hash_exp}")
 
-    path_experimento = criar_branch_e_checkout(usuario, timestamp)
-    salvar_info_local(path_experimento, hash_exp, usuario, timestamp)
-    criar_commit_no_experimento(path_experimento, hash_exp)
-    print(f"\nAbra o terminal na worktree com:\ncd {path_experimento}\n")
-    print(f"Experimento {hash_exp} criado com sucesso.")
-    print(path_experimento)
+    if versioning_control == True:
+
+        path_experimento = criar_branch_e_checkout(usuario, timestamp)
+        salvar_info_local(path_experimento, hash_exp, usuario, timestamp)
+        criar_commit_no_experimento(path_experimento, hash_exp)
+        print(f"\nAbra o terminal na worktree com:\ncd {path_experimento}\n")
+        print(f"Experimento {hash_exp} criado com sucesso.")
+        print(path_experimento)
+    else:
+        salvar_info_local(Path("../"), hash_exp, usuario, timestamp)
+
