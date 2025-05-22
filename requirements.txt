@@ -7,7 +7,6 @@ charset-normalizer==3.4.1
 click==8.1.8
 coverage==7.6.1
 cryptography==44.0.1
-dfa-lib-python==1.0.0
 dfanalyzer==0.0.4
 docker==7.1.0
 exceptiongroup==1.2.2
