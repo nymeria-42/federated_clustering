@@ -34,7 +34,7 @@ from dfa_lib_python.element import Element
 from dfa_lib_python.task_status import TaskStatus
 from dfa_lib_python.extractor_extension import ExtractorExtension
 from time import perf_counter
-
+import pickle
 
 dataflow_tag = "nvidiaflare-df"
 
@@ -123,6 +123,20 @@ class KMeansAssembler(Assembler):
             kmeans_time = perf_counter() - start_kmeans
 
         assembling_time = perf_counter() - start
+
+
+        # Define what you want to save
+        model_state = {
+            'center': self.center,
+            'count': self.count,
+            'collection': self.collection,
+            'hash_experiment': self.hash_experiment,
+            'n_cluster': self.n_cluster,
+        }
+
+        # Save the model to disk
+        with open('kmeans_model.pkl', 'wb') as f:
+            pickle.dump(model_state, f)
         to_dfanalyzer = [self.hash_experiment, current_round, n_feature, self.n_cluster]
         t8_input = DataSet("iAssemble", [Element(to_dfanalyzer)])
         t8.add_dataset(t8_input)

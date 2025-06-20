@@ -3,7 +3,7 @@ import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
-
+import shutil
 
 def carregar_info_experimento() -> dict:
     info_path = Path("experiment_info.json")
@@ -36,12 +36,37 @@ def criar_commit_final(duracao: str, hash_valor: str):
         print(f"Erro ao executar comando Git: {e}")
         raise
 
+def copiar_e_commit_modelo(hash_valor: str):
+    try:
+        # Define source and destination paths
+        source_path = os.path.join("workspace", "fed_clustering", "prod_01", "server1", "kmeans_model.pkl")
+        dest_path = "./kmeans_model.pkl"
+
+        # Copy the file
+        shutil.copyfile(source_path, dest_path)
+        print(f"Modelo copiado de '{source_path}' para '{dest_path}'.")
+
+        # Git add and commit
+        subprocess.run(["git", "add", "kmeans_model.pkl"], check=True)
+        msg = f"Salvando modelo KMeans - HASH: {hash_valor}"
+        subprocess.run(["git", "commit", "-m", msg], check=True)
+        print("Commit do modelo criado com sucesso.")
+    except FileNotFoundError:
+        print(f"Arquivo não encontrado: {source_path}")
+        raise
+    except subprocess.CalledProcessError as e:
+        print(f"Erro ao executar comando Git: {e}")
+        raise
 
 if __name__ == "__main__":
     try:
         info = carregar_info_experimento()
         duracao = calcular_tempo_decorrido(info["timestamp"])
+        copiar_e_commit_modelo(
+            info["hash_experimento"]
+        )
         criar_commit_final(duracao, info["hash_experimento"])
         print(f"Experimento finalizado com duração: {duracao}")
+
     except Exception as e:
         print(f"Erro ao finalizar experimento: {e}")
