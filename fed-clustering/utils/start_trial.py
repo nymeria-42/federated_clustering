@@ -66,7 +66,7 @@ def salvar_info_local(
 ):
     info = {"usuario": usuario, "timestamp": timestamp, "hash_trial": hash_valor}
     print(worktree_path)
-    info_path = worktree_path / "fed-clustering/_info.json"
+    info_path = worktree_path / "fed-clustering/trial_info.json"
     with open(info_path, "w") as f:
         json.dump(info, f, indent=4)
     print(f"Arquivo de info salvo em: {info_path}")
