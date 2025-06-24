@@ -24,9 +24,9 @@ import numpy as np
 
 from nvflare.apis.fl_constant import JobConstants
 
-from helpers import get_hash_experiment
+from helpers import get_hash_trial
 
-HASH_EXPERIMENT = get_hash_experiment()
+HASH_trial = get_hash_trial()
 
 JOBS_ROOT = "jobs"
 
@@ -207,13 +207,13 @@ def _update_client_config(config: dict, args, site_name: str, site_indices):
     config["components"][0]["args"]["valid_start"] = site_indices["valid"]["start"]
     config["components"][0]["args"]["valid_end"] = site_indices["valid"]["end"]
     config["components"][0]["args"]["client_id"] = int(site_name.split("-")[-1])
-    config["components"][0]["args"]["hash_experiment"] = HASH_EXPERIMENT
+    config["components"][0]["args"]["hash_trial"] = HASH_trial
 
 
 
 def _update_server_config(config: dict, args):
     config["min_clients"] = args.site_num
-    config["components"][3]["args"]["hash_experiment"] = HASH_EXPERIMENT
+    config["components"][3]["args"]["hash_trial"] = HASH_trial
 
 
 def _copy_custom_files(src_job_path, src_app_name, dst_job_path, dst_app_name):
@@ -339,7 +339,7 @@ def main():
         )
 
     to_dfanalyzer = [
-        HASH_EXPERIMENT,
+        HASH_trial,
         args.task_name,
         args.data_path,
         args.site_num,

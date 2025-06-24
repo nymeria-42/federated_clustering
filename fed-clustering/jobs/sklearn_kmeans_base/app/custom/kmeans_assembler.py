@@ -40,7 +40,7 @@ dataflow_tag = "nvidiaflare-df"
 
 
 class KMeansAssembler(Assembler):
-    def __init__(self, hash_experiment: str):
+    def __init__(self, hash_trial: str):
         super().__init__(data_kind=DataKind.WEIGHTS)
         # Aggregator needs to keep record of historical
         # center and count information for mini-batch kmeans
@@ -48,7 +48,7 @@ class KMeansAssembler(Assembler):
         self.count = None
         self.n_cluster = 0
         self.current_round = 0
-        self.hash_experiment = hash_experiment
+        self.hash_trial = hash_trial
 
     def get_model_params(self, dxo: DXO):
 
@@ -63,7 +63,7 @@ class KMeansAssembler(Assembler):
         t6.begin()
         data = dxo.data
 
-        to_dfanalyzer = [self.hash_experiment, data["center"], data["count"]]
+        to_dfanalyzer = [self.hash_trial, data["center"], data["count"]]
         t6_input = DataSet("iGetModelParams", [Element(to_dfanalyzer)])
         t6.add_dataset(t6_input)
         t6_output = DataSet("oGetModelParams", [Element([])])
@@ -130,19 +130,19 @@ class KMeansAssembler(Assembler):
             'center': self.center,
             'count': self.count,
             'collection': self.collection,
-            'hash_experiment': self.hash_experiment,
+            'hash_trial': self.hash_trial,
             'n_cluster': self.n_cluster,
         }
 
         # Save the model to disk
         with open('kmeans_model.pkl', 'wb') as f:
             pickle.dump(model_state, f)
-        to_dfanalyzer = [self.hash_experiment, current_round, n_feature, self.n_cluster]
+        to_dfanalyzer = [self.hash_trial, current_round, n_feature, self.n_cluster]
         t8_input = DataSet("iAssemble", [Element(to_dfanalyzer)])
         t8.add_dataset(t8_input)
         t8_output = DataSet(
             "oAssemble",
-            [Element([self.hash_experiment, self.center, self.count, assembling_time, kmeans_time])],
+            [Element([self.hash_trial, self.center, self.count, assembling_time, kmeans_time])],
         )
         t8.add_dataset(t8_output)
         t8.end()
