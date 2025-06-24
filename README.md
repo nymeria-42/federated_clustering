@@ -17,7 +17,7 @@ Each FL round consists of:
 ## Running Federated Learning with Proper Data Splitting
 
 ### Data Partitioning
-For an experiment with `K` clients, the dataset is split into `K+1` non-overlapping parts:
+For an trial with `K` clients, the dataset is split into `K+1` non-overlapping parts:
 - `K` parts for client training.
 - `1` common validation dataset.
 
@@ -33,7 +33,7 @@ Clients' data sizes can be distributed using different strategies:
 ## Capturing Provenance with DfAnalyzer
 
 DfAnalyzer is a library designed to capture provenance data, which includes:
-- **Prospective Provenance**: The "recipe" of the experiment, capturing configurations before execution.
+- **Prospective Provenance**: The "recipe" of the trial, capturing configurations before execution.
 - **Retrospective Provenance**: Logs and tracks execution results, including data transformations and FL training steps.
 
 ### Setting Up DfAnalyzer
@@ -45,14 +45,25 @@ DfAnalyzer is a library designed to capture provenance data, which includes:
    ```bash
    cd dfanalyzer && docker compose up dfanalyzer
    ```
-3. Ensure DfAnalyzer is running in the background before starting experiments.
+3. Ensure DfAnalyzer is running in the background before starting trials.
 
-4. Run the prospective provenance script:
+4. Create and activate a virtualenv with python=3.8
+   ```bash
+   virtualenv venv --python=3.8
+   . venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+5.  Install `dfa-lib-python`:
+   ```bash
+   cd dfanalyzer/dfa-lib/python & make install
+   ```
+6. Run the prospective provenance script:
    ```bash
    python fed-clustering/utils/prospective_provenance.py
    ```
    
-   - Responsible for capturing and recording metadata about the design and configuration of the experiments before the runs.
+   - Responsible for capturing and recording metadata about the design and configuration of the trials before the runs.
 
 ---
 
@@ -65,24 +76,19 @@ NVFlare is used to set up the federated learning infrastructure.
 docker build -t nvflare-service .
 ```
 
-- Create and activate a virtualenv with python=3.8
-```bash
-virtualenv venv --python=3.8
-. venv/bin/activate
-pip install -r requirements.txt
-```
 
-## Running the Experiment
+
+## Running the trial
 From `fed-clustering folder`.
 
-### Prepare experiment
+### Prepare trial
 ```bash
-source start_experiment.sh
+source start_trial.sh
 ```
 
-- If versioning_control is enabled in `utils/start_experiment.py`, a new branch is created under the `experimentos/` folder, named with the user and the experiment’s start timestamp. A hash is generated and stored in `experiment_info.json`. Additionally, a commit is created containing this hash. The hash can be used to query the provenance database for records related exclusively to that experiment.
+- If versioning_control is enabled in `utils/start_trial.py`, a new branch is created under the `trials/` folder, named with the user and the trial’s start timestamp. A hash is generated and stored in `trial_info.json`. Additionally, a commit is created containing this hash. The hash can be used to query the provenance database for records related exclusively to that trial.
 
-- If versioning_control is disabled, the experiment runs in the current folder and branch without creating a new branch or commit. Nonetheless, a hash is still generated and stored in `experiment_info.json`, enabling tracking and querying in the provenance database.
+- If versioning_control is disabled, the trial runs in the current folder and branch without creating a new branch or commit. Nonetheless, a hash is still generated and stored in `trial_info.json`, enabling tracking and querying in the provenance database.
 
 - Remember to reactivate the virtual environment
 
@@ -162,7 +168,7 @@ admin@nvidia.com
 check_status [server|client]
 ```
 
-### Submitting and Running the Experiment
+### Submitting and Running the trial
 ```bash
 submit_job sklearn_kmeans_2_uniform
 ```
@@ -178,10 +184,10 @@ The default password is `monetdb`.
 Then, we can submit the queries, like:
 
 ```SQL
-SELECT client_id, silhouette_score FROM iClientValidation WHERE experiment_id = {hash_experiment};
+SELECT client_id, silhouette_score FROM iClientValidation WHERE trial_id = {hash_trial};
 ```
 ---
 
 ## Conclusion
-This project demonstrates federated k-Means clustering using NVFlare, Scikit-learn, and DfAnalyzer. Provenance data is captured throughout, ensuring transparency and reproducibility of FL experiments.
+This project demonstrates federated k-Means clustering using NVFlare, Scikit-learn, and DfAnalyzer. Provenance data is captured throughout, ensuring transparency and reproducibility of FL trials.
 
