@@ -33,6 +33,7 @@ def prepare_data(
         x = x[idx_random, :]
         ids = ids[idx_random]
 
+
     # Combine back into a DataFrame
     data = np.column_stack((ids, x))
     # remove header
@@ -41,6 +42,16 @@ def prepare_data(
     x = x.astype(float)
 
     df = pd.DataFrame(data=x)
+
+    for col in df.columns:
+        min_val = df[col].min()
+        max_val = df[col].max()
+        range_val = max_val - min_val
+        if range_val > 0:
+            df[col] = (df[col] - min_val) / range_val
+        else:
+            df[col] = 0.0
+
 
     # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
