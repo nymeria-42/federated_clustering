@@ -25,7 +25,7 @@ def prepare_data(
     df = df.dropna(axis=1)  # Drop columns with NaN
 
     ids = df.iloc[:, 0].values
-    x = df.iloc[:, 3:].values
+    x = df.iloc[:, 4:].values
 
     if randomize:
         np.random.seed(0)
