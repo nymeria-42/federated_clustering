@@ -21,7 +21,7 @@ tf1_input = Set(
     "iPrepareData",
     SetType.INPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("dataset_name", AttributeType.TEXT),
         Attribute("randomize", AttributeType.NUMERIC),
         Attribute("out_path", AttributeType.TEXT),
@@ -38,7 +38,7 @@ tf2_input = Set(
     "iJobConfig",
     SetType.INPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("task_name", AttributeType.TEXT),
         Attribute("data_path", AttributeType.TEXT),
         Attribute("site_num", AttributeType.NUMERIC),
@@ -62,7 +62,7 @@ tf3_input = Set(
     "iLoadData",
     SetType.INPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("loading_time", AttributeType.NUMERIC),
     ],
@@ -81,7 +81,7 @@ tf4_input = Set(
     "iInitializeClient",
     SetType.INPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("n_samples", AttributeType.NUMERIC),
         Attribute("duration", AttributeType.NUMERIC),
@@ -106,7 +106,7 @@ tf5_input = Set(
     "iClientTraining",
     SetType.INPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("current_round", AttributeType.NUMERIC),
         Attribute("n_clusters", AttributeType.TEXT),
@@ -121,7 +121,7 @@ tf5_output = Set(
     "oClientTraining",
     SetType.OUTPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("current_round", AttributeType.NUMERIC),
         Attribute("center_local", AttributeType.TEXT),
@@ -145,7 +145,7 @@ tf6_input = Set(
     "iGetModelParams",
     SetType.INPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("center", AttributeType.TEXT),
         Attribute("count", AttributeType.TEXT),
     ],
@@ -171,7 +171,7 @@ tf7_input = Set(
     "iAssemble",
     SetType.INPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("current_round", AttributeType.NUMERIC),
         Attribute("n_feature", AttributeType.NUMERIC),
         Attribute("n_cluster", AttributeType.NUMERIC),
@@ -181,7 +181,7 @@ tf7_output = Set(
     "oAssemble",
     SetType.OUTPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("center", AttributeType.TEXT),
         Attribute("count", AttributeType.TEXT),
         Attribute("assembling_time", AttributeType.NUMERIC),
@@ -206,7 +206,7 @@ tf8_input = Set(
     "iClientValidation",
     SetType.INPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("current_round", AttributeType.NUMERIC),
         Attribute("silhouette_score", AttributeType.NUMERIC),
@@ -238,7 +238,7 @@ tf9_output = Set(
     "oFinalizeClient",
     SetType.OUTPUT,
     [
-        Attribute("experiment_id", AttributeType.TEXT),
+        Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("duration", AttributeType.NUMERIC),
     ],

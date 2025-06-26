@@ -5,9 +5,9 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from helpers import get_hash_experiment
+from helpers import get_hash_trial
 
-HASH_EXPERIMENT = get_hash_experiment()
+HASH_trial = get_hash_trial()
 
 
 def prepare_data(
@@ -82,7 +82,7 @@ def main():
     duration = perf_counter() - start
 
     to_dfanalyzer = [
-        HASH_EXPERIMENT,
+        HASH_trial,
         args.input_csv,
         args.randomize,
         args.out_path,
