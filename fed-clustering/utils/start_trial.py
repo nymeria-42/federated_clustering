@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 import os
 import json
-
+import argparse
 
 CONFIG_PATHS = [
     "./jobs/sklearn_kmeans_base/app/config/config_fed_server.json",
@@ -83,19 +83,19 @@ def criar_commit_no_trial(worktree_path: Path, hash_valor: str):
     finally:
         os.chdir("..")
 
-
-if __name__ == "__main__":
-    versioning_control = True 
-
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--versioning_control", type=bool, default=False)
+    args = parser.parse_args()
+    versioning_control = args.versioning_control
+    print(versioning_control)
     usuario = obter_usuario_git()
     timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%S")
     conteudo_config = ler_conteudo_arquivos()
     hash_exp = gerar_hash(conteudo_config, usuario, timestamp)
 
     print(f"Hash do trial: {hash_exp}")
-
-    if versioning_control == True:
-
+    if versioning_control:
         path_trial = criar_branch_e_checkout(usuario, timestamp)
         salvar_info_local(path_trial, hash_exp, usuario, timestamp)
         criar_commit_no_trial(path_trial, hash_exp)
@@ -104,4 +104,7 @@ if __name__ == "__main__":
         print(path_trial)
     else:
         salvar_info_local(Path("../"), hash_exp, usuario, timestamp)
+
+if __name__ == "__main__":
+   main()
 
