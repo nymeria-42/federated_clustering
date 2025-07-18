@@ -79,18 +79,21 @@ class KMeansLearner(Learner):
 
         valid_size = int(round(data_size * self.valid_frac))
 
-        indices = {
+        split_data_indices = {
             "valid": {"start": 0, "end": valid_size},
+            "train": {"start": valid_size, "end": data_size},
         }
         
-        train_data = load_data(
+        train_data = load_data_for_range(
             self.data_path,
+            split_data_indices["train"]["start"],
+            split_data_indices["train"]["end"],
         )
 
         valid_data = load_data_for_range(
             self.data_path,  
-            indices["valid"]["start"],
-            indices["valid"]["end"],
+            split_data_indices["valid"]["start"],
+            split_data_indices["valid"]["end"],
         )   
 
         duration = perf_counter() - start
@@ -165,12 +168,15 @@ class KMeansLearner(Learner):
         # so only x_train will be used
         count_local = None
         (x_train, y_train, train_size) = self.train_data
+        # log x_train head
+        self.log_info(fl_ctx, f"x_train head: {x_train[:5]}")
 
         center_global = None
         if curr_round == 0:
             # first round, compute initial center with kmeans++ method
             # model will be None for this round
             self.n_clusters = global_param["n_clusters"]
+            
             center_local, _ = kmeans_plusplus(
                 x_train, n_clusters=self.n_clusters, random_state=self.random_state
             )

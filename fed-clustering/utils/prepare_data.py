@@ -22,26 +22,21 @@ def prepare_data(
     df = df.fillna(-1)
     df = df.apply(pd.to_numeric, errors="coerce")  # Convert non-numeric to NaN
 
-    df = df.dropna(axis=1)  # Drop columns with NaN
+    df = df[["coadd_object_id", "mag_auto_g_dered", "mag_auto_r_dered", "mag_auto_i_dered", "mag_auto_z_dered", "mag_auto_y_dered"]]
 
-    ids = df.iloc[:, 0].values
-    x = df.iloc[:, 4:].values
+    df["gmr"] = df["mag_auto_g_dered"] - df["mag_auto_r_dered"]
+    df["rmi"] = df["mag_auto_r_dered"] - df["mag_auto_i_dered"]
+    df["imz"] = df["mag_auto_i_dered"] - df["mag_auto_z_dered"]
+    df["zmy"] = df["mag_auto_z_dered"] - df["mag_auto_y_dered"]
+
+    columns_to_use = ["coadd_object_id", "mag_auto_g_dered", "mag_auto_r_dered", "mag_auto_i_dered", "mag_auto_z_dered", "mag_auto_y_dered", "gmr", "rmi", "imz", "zmy"]
+    df = df[columns_to_use]
 
     if randomize:
-        np.random.seed(0)
-        idx_random = np.random.permutation(len(ids))
-        x = x[idx_random, :]
-        ids = ids[idx_random]
+        df = df.sample(frac=1, random_state=0).reset_index(drop=True)
 
-
-    # Combine back into a DataFrame
-    data = np.column_stack((ids, x))
-    # remove header
-    x = x[1:]
-    # convert boolean to int
-    x = x.astype(float)
-
-    df = pd.DataFrame(data=x)
+    ids = df["coadd_object_id"].values
+    df = df.drop(columns=["coadd_object_id"]).astype(float)
 
     for col in df.columns:
         min_val = df[col].min()
@@ -53,13 +48,13 @@ def prepare_data(
             df[col] = 0.0
 
 
-    # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
-    # Save to csv file
     filename = filename if filename else "processed_data.csv"
     if file_format == "csv":
         file_path = os.path.join(output_dir, filename)
+        ids_df = pd.DataFrame(ids, columns=["coadd_object_id"])
+        ids_df.to_csv(file_path, sep=",", index=False, header=True)
         df.to_csv(file_path, sep=",", index=False, header=False)
     else:
         raise NotImplementedError("Only CSV format is supported.")

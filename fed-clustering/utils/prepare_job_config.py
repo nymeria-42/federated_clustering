@@ -198,14 +198,11 @@ def _update_meta(meta: dict, args):
     meta["min_clients"] = args.site_num
 
 
-def _update_client_config(config: dict, args, site_name: str, site_indices):
+def _update_client_config(config: dict, args, site_name: str):
     # update client config
     # data path and training/validation row indices
     config["components"][0]["args"]["data_path"] = args.data_path
-    config["components"][0]["args"]["train_start"] = site_indices[site_name]["start"]
-    config["components"][0]["args"]["train_end"] = site_indices[site_name]["end"]
-    config["components"][0]["args"]["valid_start"] = site_indices["valid"]["start"]
-    config["components"][0]["args"]["valid_end"] = site_indices["valid"]["end"]
+    config["components"][0]["args"]["valid_frac"] = args.valid_frac
     config["components"][0]["args"]["client_id"] = int(site_name.split("-")[-1])
     config["components"][0]["args"]["hash_trial"] = HASH_trial
 
@@ -244,7 +241,7 @@ def create_server_app(src_job_path, src_app_name, dst_job_path, site_name, args)
 
 
 def create_client_app(
-    src_job_path, src_app_name, dst_job_path, site_name, site_indices, args
+    src_job_path, src_app_name, dst_job_path, site_name, args
 ):
     dst_app_name = f"app_{site_name}"
     client_config = _read_json(
@@ -257,7 +254,7 @@ def create_client_app(
         os.makedirs(dst_config_path)
 
     # adjust file contents according to each job's specs
-    _update_client_config(client_config, args, site_name, site_indices)
+    _update_client_config(client_config, args, site_name)
     client_config_filename = dst_config_path / JobConstants.CLIENT_JOB_CONFIG
     _write_json(client_config, client_config_filename)
 
@@ -318,15 +315,6 @@ def main():
     )
     args.num_rounds = server_config["num_rounds"]
 
-    # generate data split
-    site_indices = split_data(
-        args.data_path,
-        args.site_num,
-        args.data_size,
-        args.valid_frac,
-        args.site_name_prefix,
-    )
-
     # create client side app
     for i in range(1, args.site_num + 1):
         create_client_app(
@@ -334,7 +322,6 @@ def main():
             src_app_name="app",
             dst_job_path=dst_job_path,
             site_name=f"{args.site_name_prefix}{i}",
-            site_indices=site_indices,
             args=args,
         )
 

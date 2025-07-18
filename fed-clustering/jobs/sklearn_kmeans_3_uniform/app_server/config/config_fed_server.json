@@ -33,7 +33,9 @@
     {
       "id": "kmeans_assembler",
       "path": "kmeans_assembler.KMeansAssembler",
-      "args": {}
+      "args": {
+        "hash_trial": "14e85d3d7334cff685aa878d309905460a358b75"
+      }
     }
   ],
   "workflows": [

@@ -21,8 +21,11 @@
       "id": "kmeans_learner",
       "path": "kmeans_learner.KMeansLearner",
       "args": {
-        "data_path": "/tmp/nvflare/dataset/sklearn_iris.csv",
-        "random_state": 0
+        "data_path": "/tmp/nvflare/dataset/des.csv",
+        "random_state": 0,
+        "valid_frac": 0.35,
+        "client_id": 3,
+        "hash_trial": "14e85d3d7334cff685aa878d309905460a358b75"
       }
     }
   ]
