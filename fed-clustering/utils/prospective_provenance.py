@@ -210,6 +210,7 @@ tf8_input = Set(
         Attribute("client_id", AttributeType.TEXT),
         Attribute("current_round", AttributeType.NUMERIC),
         Attribute("silhouette_score", AttributeType.NUMERIC),
+        Attribute("validation_time", AttributeType.NUMERIC),
     ],
 )
 tf8_output = Set(

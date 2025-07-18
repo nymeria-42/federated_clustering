@@ -218,7 +218,7 @@ class KMeansLearner(Learner):
         # fit a standalone KMeans with just the given center
 
         t7 = Task(
-            8 + 4 * (curr_round),
+            8 + 4 * (curr_round-1),
             dataflow_tag,
             "ClientValidation",
             dependency=Task(7 + 4 * (curr_round), dataflow_tag, "Assemble"),
@@ -237,7 +237,7 @@ class KMeansLearner(Learner):
         metrics = {"Silhouette Score": silhouette}
 
         duration = perf_counter() - start
-        to_dfanalyzer = [self.hash_trial, self.client_id, curr_round, silhouette]
+        to_dfanalyzer = [self.hash_trial, self.client_id, curr_round, silhouette, duration]
         t7_input = DataSet("iClientValidation", [Element(to_dfanalyzer)])
         t7.add_dataset(t7_input)
         t7_output = DataSet("oClientValidation", [Element([])])
