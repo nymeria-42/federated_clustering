@@ -8,3 +8,7 @@ services:
       - DFA_URL=http://0.0.0.0
     working_dir: "/DfAnalyzer"
     entrypoint: [ "sh", "start-dfanalyzer.sh" ]
+    volumes:
+      - ./save_results.sql:/DfAnalyzer/save_results.sql
+      - ./data:/DfAnalyzer/data/
+      - ./results:/DfAnalyzer/results/
