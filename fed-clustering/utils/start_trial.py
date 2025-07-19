@@ -83,12 +83,25 @@ def criar_commit_no_trial(worktree_path: Path, hash_valor: str):
     finally:
         os.chdir("..")
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ("yes", "true", "t", "1"):
+        return True
+    elif v.lower() in ("no", "false", "f", "0"):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Boolean value expected.")
+    
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--versioning_control", type=bool, default=False)
+    parser.add_argument(
+        "--versioning_control",
+        type=str2bool,
+        default=False,
+    )
     args = parser.parse_args()
     versioning_control = args.versioning_control
-    print(versioning_control)
     usuario = obter_usuario_git()
     timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%S")
     conteudo_config = ler_conteudo_arquivos()
