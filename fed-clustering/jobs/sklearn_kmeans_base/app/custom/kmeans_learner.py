@@ -111,7 +111,8 @@ class KMeansLearner(Learner):
         # train data size, to be used for setting
         # NUM_STEPS_CURRENT_ROUND for potential use in aggregation
         self.n_samples = data["train"][-1]
-        t4 = Task(4, dataflow_tag, "InitializeClient")
+        t4 = Task(4, dataflow_tag, "InitializeClient",
+                  dependency=Task(3, dataflow_tag, "LoadData"))
         t4.begin()
         start = perf_counter()
         duration = perf_counter() - start
@@ -140,7 +141,7 @@ class KMeansLearner(Learner):
             t5.add_dependency(
                 Dependency(
                     ["InitializeClient", "ClientValidation"],
-                    ["4", str(8 + 4 * (curr_round - 1))],
+                    ["4", str(8 + 4 * (curr_round - 2))],
                 )
             )
 
@@ -221,7 +222,7 @@ class KMeansLearner(Learner):
             8 + 4 * (curr_round-1),
             dataflow_tag,
             "ClientValidation",
-            dependency=Task(7 + 4 * (curr_round), dataflow_tag, "Assemble"),
+            dependency=Task(7 + 4 * (curr_round-1), dataflow_tag, "Assemble"),
         )
         t7.begin()
         start = perf_counter()
@@ -254,7 +255,7 @@ class KMeansLearner(Learner):
             9 + 4 * (curr_round),
             dataflow_tag,
             "FinalizeClient",
-            dependency=Task(8 + 4 * (curr_round), dataflow_tag, "ClientValidation"),
+            dependency=Task(8 + 4 * (curr_round-1), dataflow_tag, "ClientValidation"),
         )
         t9.begin()
         start = perf_counter()
