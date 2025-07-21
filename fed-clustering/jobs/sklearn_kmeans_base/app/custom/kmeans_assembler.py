@@ -35,7 +35,7 @@ from dfa_lib_python.task_status import TaskStatus
 from dfa_lib_python.extractor_extension import ExtractorExtension
 from time import perf_counter
 import pickle
-
+import datetime
 dataflow_tag = "nvidiaflare-df"
 
 
@@ -84,6 +84,8 @@ class KMeansAssembler(Assembler):
         t8.begin()
         start = perf_counter()
         kmeans_time = 0
+        timestamp_beginning = datetime.datetime.now()
+
         if current_round == 0:
             # First round, collect the information regarding n_feature and n_cluster
             # Initialize the aggregated center and count to all zero
@@ -122,7 +124,6 @@ class KMeansAssembler(Assembler):
                 self.center[center_idx] = centers_global_rescale
             kmeans_time = perf_counter() - start_kmeans
 
-        assembling_time = perf_counter() - start
 
 
         # Define what you want to save
@@ -137,12 +138,15 @@ class KMeansAssembler(Assembler):
         # Save the model to disk
         with open('kmeans_model.pkl', 'wb') as f:
             pickle.dump(model_state, f)
-        to_dfanalyzer = [self.hash_trial, current_round, n_feature, self.n_cluster]
+
+        assembling_time = perf_counter() - start
+        timestamp = datetime.datetime.now()
+        to_dfanalyzer = [self.hash_trial, current_round, n_feature, self.n_cluster, timestamp_beginning]
         t8_input = DataSet("iAssemble", [Element(to_dfanalyzer)])
         t8.add_dataset(t8_input)
         t8_output = DataSet(
             "oAssemble",
-            [Element([self.hash_trial, self.center, self.count, assembling_time, kmeans_time])],
+            [Element([self.hash_trial, self.center, self.count, assembling_time, kmeans_time, timestamp])],
         )
         t8.add_dataset(t8_output)
         t8.end()

@@ -65,6 +65,7 @@ tf3_input = Set(
         Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("loading_time", AttributeType.NUMERIC),
+        Attribute("timestamp", AttributeType.TEXT),
     ],
 )
 
@@ -85,6 +86,7 @@ tf4_input = Set(
         Attribute("client_id", AttributeType.TEXT),
         Attribute("n_samples", AttributeType.NUMERIC),
         Attribute("duration", AttributeType.NUMERIC),
+        Attribute("timestamp", AttributeType.TEXT),
     ],
 )
 
@@ -115,6 +117,7 @@ tf5_input = Set(
         Attribute("n_init", AttributeType.NUMERIC),
         Attribute("reassignment_ratio", AttributeType.NUMERIC),
         Attribute("random_state", AttributeType.TEXT),
+        Attribute("timestamp", AttributeType.TEXT),
     ],
 )
 tf5_output = Set(
@@ -128,6 +131,8 @@ tf5_output = Set(
         Attribute("count_local", AttributeType.TEXT),
         Attribute("center_global", AttributeType.TEXT),
         Attribute("training_time", AttributeType.NUMERIC),
+        Attribute("timestamp", AttributeType.TEXT),
+
     ],
 )
 
@@ -175,6 +180,8 @@ tf7_input = Set(
         Attribute("current_round", AttributeType.NUMERIC),
         Attribute("n_feature", AttributeType.NUMERIC),
         Attribute("n_cluster", AttributeType.NUMERIC),
+        Attribute("timestamp", AttributeType.TEXT),
+
     ],
 )
 tf7_output = Set(
@@ -186,6 +193,7 @@ tf7_output = Set(
         Attribute("count", AttributeType.TEXT),
         Attribute("assembling_time", AttributeType.NUMERIC),
         Attribute("minibatch_kmeans_time", AttributeType.NUMERIC),
+        Attribute("timestamp", AttributeType.TEXT),  
     ],
 )
 
@@ -209,14 +217,22 @@ tf8_input = Set(
         Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("current_round", AttributeType.NUMERIC),
-        Attribute("silhouette_score", AttributeType.NUMERIC),
-        Attribute("validation_time", AttributeType.NUMERIC),
+        Attribute("timestamp", AttributeType.TEXT),
+
     ],
 )
 tf8_output = Set(
     "oClientValidation",
     SetType.OUTPUT,
-    [],
+    [
+        Attribute("trial_id", AttributeType.TEXT),
+        Attribute("client_id", AttributeType.TEXT),
+        Attribute("current_round", AttributeType.NUMERIC),
+        Attribute("silhouette_score", AttributeType.NUMERIC),
+        Attribute("validation_time", AttributeType.NUMERIC),
+        Attribute("timestamp", AttributeType.TEXT),
+
+    ],
 )
 
 tf7_output.set_type(SetType.INPUT)
@@ -242,6 +258,8 @@ tf9_output = Set(
         Attribute("trial_id", AttributeType.TEXT),
         Attribute("client_id", AttributeType.TEXT),
         Attribute("duration", AttributeType.NUMERIC),
+        Attribute("timestamp", AttributeType.TEXT),
+
     ],
 )
 

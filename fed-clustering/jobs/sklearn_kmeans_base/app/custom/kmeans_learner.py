@@ -36,6 +36,7 @@ from dfa_lib_python.extractor_extension import ExtractorExtension
 from dfa_lib_python.dependency import Dependency
 
 from time import perf_counter
+import datetime
 
 from pathlib import Path
 
@@ -94,8 +95,8 @@ class KMeansLearner(Learner):
         )   
 
         duration = perf_counter() - start
-
-        to_dfanalyzer = [self.hash_trial, self.client_id, duration]
+        timestamp = datetime.datetime.now()
+        to_dfanalyzer = [self.hash_trial, self.client_id, duration, timestamp]
         t3_input = DataSet("iLoadData", [Element(to_dfanalyzer)])
         t3.add_dataset(t3_input)
         t3_output = DataSet("oLoadData", [Element([])])
@@ -117,7 +118,8 @@ class KMeansLearner(Learner):
         start = perf_counter()
         duration = perf_counter() - start
 
-        to_dfanalyzer = [self.hash_trial, self.client_id, self.n_samples, duration]
+        timestamp = datetime.datetime.now()
+        to_dfanalyzer = [self.hash_trial, self.client_id, self.n_samples, duration, timestamp]
         t4_input = DataSet("iInitializeClient", [Element(to_dfanalyzer)])
         t4.add_dataset(t4_input)
         t4_output = DataSet("oInitializeClient", [Element([])])
@@ -147,6 +149,7 @@ class KMeansLearner(Learner):
 
         t5.begin()
         start = perf_counter()
+        timestamp = datetime.datetime.now()
         to_dfanalyzer = [
             self.hash_trial,
             self.client_id,
@@ -157,6 +160,7 @@ class KMeansLearner(Learner):
             self.n_init,
             self.reassignment_ratio,
             self.random_state,
+            timestamp
         ]
 
         t5_input = DataSet("iClientTraining", [Element(to_dfanalyzer)])
@@ -195,6 +199,7 @@ class KMeansLearner(Learner):
             params = {"center": center_local, "count": count_local}
 
         duration = perf_counter() - start
+        timestamp = datetime.datetime.now()
 
         to_dfanalyzer = [
             self.hash_trial,
@@ -204,6 +209,7 @@ class KMeansLearner(Learner):
             count_local,
             center_global,
             duration,
+            timestamp
         ]
 
         t5_output = DataSet("oClientTraining", [Element(to_dfanalyzer)])
@@ -226,6 +232,10 @@ class KMeansLearner(Learner):
         )
         t7.begin()
         start = perf_counter()
+        timestamp = datetime.datetime.now()
+        to_dfanalyzer = [self.hash_trial, self.client_id, curr_round, timestamp]
+        t7_input = DataSet("iClientValidation", [Element(to_dfanalyzer)])
+        t7.add_dataset(t7_input)
 
         center_global = global_param["center"]
         kmeans_global = KMeans(n_clusters=self.n_clusters, init=center_global, n_init=1)
@@ -238,10 +248,11 @@ class KMeansLearner(Learner):
         metrics = {"Silhouette Score": silhouette}
 
         duration = perf_counter() - start
-        to_dfanalyzer = [self.hash_trial, self.client_id, curr_round, silhouette, duration]
-        t7_input = DataSet("iClientValidation", [Element(to_dfanalyzer)])
-        t7.add_dataset(t7_input)
-        t7_output = DataSet("oClientValidation", [Element([])])
+        timestamp = datetime.datetime.now()
+
+        to_dfanalyzer = [self.hash_trial, self.client_id, curr_round, silhouette, duration, timestamp]
+        
+        t7_output = DataSet("oClientValidation", [Element(to_dfanalyzer)])
         t7.add_dataset(t7_output)
         t7.end()
         return metrics, kmeans_global
@@ -250,6 +261,7 @@ class KMeansLearner(Learner):
         # freeing resources in finalize
         # get round
         curr_round = fl_ctx.get_prop(AppConstants.CURRENT_ROUND)
+        timestamp = datetime.datetime.now()
 
         t9 = Task(
             9 + 4 * (curr_round),
@@ -264,7 +276,7 @@ class KMeansLearner(Learner):
         self.log_info(fl_ctx, "Freed training resources")
 
         duration = perf_counter() - start
-        to_dfanalyzer = [self.hash_trial, self.client_id, duration]
+        to_dfanalyzer = [self.hash_trial, self.client_id, duration, timestamp]
         t9_output = DataSet("oFinalizeClient", [Element(to_dfanalyzer)])
         t9.add_dataset(t9_output)
         t9.end()
