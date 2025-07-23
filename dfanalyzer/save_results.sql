@@ -26,7 +26,8 @@ COPY (
         max_iter,
         n_init,
         reassignment_ratio,
-        random_state
+        random_state,
+        timestamp
     FROM iClientTraining
 )
 INTO 'results/iClientTraining.csv' ON CLIENT
@@ -41,7 +42,8 @@ COPY (
         center_local,
         count_local,
         center_global,
-        training_time
+        training_time,
+        timestamp
     FROM oClientTraining
 )
 INTO 'results/oClientTraining.csv' ON CLIENT
@@ -54,7 +56,8 @@ COPY (
         center,
         count,
         assembling_time,
-        minibatch_kmeans_time
+        minibatch_kmeans_time,
+        timestamp
     FROM oAssemble
 )
 INTO 'results/oAssemble.csv' ON CLIENT
@@ -67,10 +70,11 @@ COPY (
         client_id,
         current_round,
         silhouette_score,
-        validation_time
-    FROM iClientValidation
+        validation_time,
+        timestamp
+    FROM oClientValidation
 )
-INTO 'results/iClientValidation.csv' ON CLIENT
+INTO 'results/oClientValidation.csv' ON CLIENT
 USING DELIMITERS ',', '\n', '"';
 
 -- Client Finalization Metadata
@@ -78,7 +82,8 @@ COPY (
     SELECT
         trial_id,
         client_id,
-        duration
+        duration,
+        timestamp
     FROM oFinalizeClient
 )
 INTO 'results/oFinalizeClient.csv' ON CLIENT

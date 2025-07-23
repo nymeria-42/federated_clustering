@@ -188,6 +188,13 @@ SELECT client_id, silhouette_score FROM iClientValidation WHERE trial_id = {hash
 ```
 ---
 
+## Saving the retrospective provenance data using the `save_results` script
+```bash 
+docker exec -it dfanalyzer mclient -u monetdb -d dataflow_analyzer -i save_results.sql
+```
+
+This creates a folder `results` inside the `dfanalyzer` directory with .csv files for each predefined provenance table 
+
 ## Conclusion
 This project demonstrates federated k-Means clustering using NVFlare, Scikit-learn, and DfAnalyzer. Provenance data is captured throughout, ensuring transparency and reproducibility of FL trials.
 
