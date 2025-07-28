@@ -38,14 +38,14 @@ def prepare_data(
     ids = df["coadd_object_id"].values
     df = df.drop(columns=["coadd_object_id"]).astype(float)
 
-    for col in df.columns:
-        min_val = df[col].min()
-        max_val = df[col].max()
-        range_val = max_val - min_val
-        if range_val > 0:
-            df[col] = (df[col] - min_val) / range_val
-        else:
-            df[col] = 0.0
+    # for col in df.columns:
+    #     min_val = df[col].min()
+    #     max_val = df[col].max()
+    #     range_val = max_val - min_val
+    #     if range_val > 0:
+    #         df[col] = (df[col] - min_val) / range_val
+    #     else:
+    #         df[col] = 0.0
 
 
     os.makedirs(output_dir, exist_ok=True)
