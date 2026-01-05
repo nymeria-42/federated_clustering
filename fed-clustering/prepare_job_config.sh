@@ -6,11 +6,11 @@ then
     echo "Please check if you saved Iris dataset in ${DATASET_PATH}"
 fi
 
-valid_frac=0.35
+valid_frac=1
 echo "Generating job configs with data splits, reading from ${DATASET_PATH}"
 
-task_name="sklearn_kmeans"
-for site_num in 3;
+task_name="sklearn_dbscan"
+for site_num in 10;
 do
     python3 utils/prepare_job_config.py \
     --task_name "${task_name}" \

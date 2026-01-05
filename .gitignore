@@ -181,3 +181,8 @@ workspace/
 
 *.json
 dfanalyzer/data
+
+*.png
+*.jpg
+*.jpeg
+*.txt

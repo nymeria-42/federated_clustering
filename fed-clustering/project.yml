@@ -42,6 +42,30 @@ participants:
     type: admin
     org: nvidia
     role: project_admin
+  - name: site-3
+    type: client
+    org: nvidia
+  - name: site-4
+    type: client
+    org: nvidia
+  - name: site-5
+    type: client
+    org: nvidia
+  - name: site-6
+    type: client
+    org: nvidia
+  - name: site-7
+    type: client
+    org: nvidia
+  - name: site-8
+    type: client
+    org: nvidia
+  - name: site-9    
+    type: client
+    org: nvidia
+  - name: site-10
+    type: client
+    org: nvidia
 
 # The same methods in all builders are called in their order defined in builders section
 builders:
