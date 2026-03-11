@@ -22,6 +22,7 @@
       "path": "kmeans_learner.KMeansLearner",
       "args": {
         "data_path": "/tmp/nvflare/dataset/sklearn_iris.csv",
+        "valid_frac": 0.2,
         "random_state": 0
       }
     }

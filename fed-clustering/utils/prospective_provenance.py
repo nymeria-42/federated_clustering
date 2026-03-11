@@ -14,12 +14,12 @@ from dfa_lib_python.dependency import Dependency
 import argparse
 # DfAnalyzer Instrumentation
 
-def create_dataflow(dataflow_tag: str):
+def create_dataflow(dataflow_tag: str, algorithm: str = "kmeans"):
     kmeans = False
     dbscan = False
-    if "kmeans" in dataflow_tag:
+    if "kmeans" in algorithm:
         kmeans = True
-    if "dbscan" in dataflow_tag:
+    if "dbscan" in algorithm:
         dbscan = True
     df = Dataflow(dataflow_tag)
 
@@ -52,7 +52,6 @@ def create_dataflow(dataflow_tag: str):
             Attribute("site_name_prefix", AttributeType.TEXT),
             Attribute("data_size", AttributeType.NUMERIC),
             Attribute("valid_frac", AttributeType.NUMERIC),
-            Attribute("split_method", AttributeType.TEXT),
             Attribute("num_rounds", AttributeType.NUMERIC),
         ],
     )
@@ -348,5 +347,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    dataflow_tag = f"nvidiaflare-df-{args.algorithm}"
-    create_dataflow(dataflow_tag)
+    dataflow_tag = f"nvidiaflare-df"
+    create_dataflow(dataflow_tag, args.algorithm)

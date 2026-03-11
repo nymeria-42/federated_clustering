@@ -48,9 +48,9 @@ class KMeansLearner(Learner):
     def __init__(
         self,
         data_path: str,
-        client_id: int,
-        hash_trial: str,
         valid_frac: float,
+        client_id: int = None,
+        hash_trial: str = None,
         random_state: int = None,
         max_iter: int = 1,
         n_init: int = 1,
@@ -63,12 +63,12 @@ class KMeansLearner(Learner):
         self.max_iter = max_iter
         self.n_init = n_init
         self.reassignment_ratio = reassignment_ratio
-        self.client_id = int(client_id)
+        self.client_id = client_id  # Will be set from FL context if None
         self.train_data = None
         self.valid_data = None
         self.n_samples = None
         self.n_clusters = None
-        self.hash_trial = hash_trial
+        self.hash_trial = hash_trial  # Will be set from FL context if None
 
     def load_data(self) -> dict:
         t3 = Task(3, dataflow_tag, "LoadData")
@@ -106,6 +106,16 @@ class KMeansLearner(Learner):
         return {"train": train_data, "valid": valid_data}
 
     def initialize(self, parts: dict, fl_ctx: FLContext):
+        # Extract client_id from FL context if not provided
+        if self.client_id is None:
+            site_name = fl_ctx.get_identity_name()
+            # Extract client number from site name (e.g., "site-1" -> 1)
+            self.client_id = int(site_name.split("-")[-1])
+        
+        # Extract hash_trial from FL context if not provided
+        if self.hash_trial is None:
+            self.hash_trial = fl_ctx.get_prop("hash_trial", "default_trial")
+        
         data = self.load_data()
         self.train_data = data["train"]
         self.valid_data = data["valid"]

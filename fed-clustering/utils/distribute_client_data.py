@@ -2,9 +2,10 @@ import subprocess
 import sys
 
 # Parameters
-CLIENTS = [f"site-{i+1}" for i in range(10)]  # Adjust number of clients as needed
+NUM_CLIENTS = 10
+CLIENTS = [f"site-{i+1}" for i in range(NUM_CLIENTS)] 
 DATASET_PREFIX = "client_"  # e.g., client_0.csv, client_1.csv, ...
-DATASET_FOLDER = "/tmp/nvflare/dataset/des.csv"
+DATASET_FOLDER = "/tmp/nvflare/dataset/dataset.csv"
 LOCAL_DATA_PATH = "/home/nymeria/repos/federated_clustering/fed-clustering/processed"  # Where the split CSVs are stored on host
 
 

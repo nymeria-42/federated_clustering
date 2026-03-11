@@ -9,7 +9,6 @@ from helpers import get_hash_trial
 
 HASH_trial = get_hash_trial()
 
-
 def prepare_data(
     input_csv: str,
     output_dir: str,
@@ -23,6 +22,7 @@ def prepare_data(
     df = df.fillna(-1)
     df = df.apply(pd.to_numeric, errors="coerce")  # Convert non-numeric to NaN
 
+    columns_to_use = ['COADD_OBJECT_ID', 'MAG_G','MAG_R','MAG_I','MAG_Z','MAG_Y','GMR','RMI','IMZ']
     df = df[columns_to_use]
 
     if randomize:

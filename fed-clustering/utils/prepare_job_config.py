@@ -17,10 +17,6 @@ import json
 import os
 import pathlib
 import shutil
-from enum import Enum
-from typing import List
-
-import numpy as np
 
 from nvflare.apis.fl_constant import JobConstants
 
@@ -29,13 +25,6 @@ from helpers import get_hash_trial
 HASH_trial = get_hash_trial()
 
 JOBS_ROOT = "jobs"
-
-
-class SplitMethod(Enum):
-    UNIFORM = "uniform"
-    LINEAR = "linear"
-    SQUARE = "square"
-    EXPONENTIAL = "exponential"
 
 
 def job_config_args_parser():
@@ -63,110 +52,8 @@ def job_config_args_parser():
         "special case valid_frac = 1, where all data will be used"
         "in validation, e.g. for evaluating unsupervised clustering with known ground truth label.",
     )
-    parser.add_argument(
-        "--split_method",
-        type=str,
-        default="uniform",
-        choices=["uniform", "linear", "square", "exponential"],
-        help="How to split the dataset",
-    )
+
     return parser
-
-
-def get_split_ratios(site_num: int, split_method: SplitMethod):
-    if split_method == SplitMethod.UNIFORM:
-        ratio_vec = np.ones(site_num)
-    elif split_method == SplitMethod.LINEAR:
-        ratio_vec = np.linspace(1, site_num, num=site_num)
-    elif split_method == SplitMethod.SQUARE:
-        ratio_vec = np.square(np.linspace(1, site_num, num=site_num))
-    elif split_method == SplitMethod.EXPONENTIAL:
-        ratio_vec = np.exp(np.linspace(1, site_num, num=site_num))
-    else:
-        raise ValueError(f"Split method {split_method.name} not implemented!")
-
-    return ratio_vec
-
-
-def split_num_proportion(n, site_num, split_method: SplitMethod) -> List[int]:
-    split = []
-    ratio_vec = get_split_ratios(site_num, split_method)
-    total = sum(ratio_vec)
-    left = n
-    for site in range(site_num - 1):
-        x = int(n * ratio_vec[site] / total)
-        left = left - x
-        split.append(x)
-    split.append(left)
-    return split
-
-
-def assign_data_index_to_sites(
-    data_size: int,
-    valid_fraction: float,
-    num_sites: int,
-    site_name_prefix: str,
-    split_method: SplitMethod = SplitMethod.UNIFORM,
-) -> dict:
-    if valid_fraction > 1.0:
-        raise ValueError(
-            "validation percent should be less than or equal to 100% of the total data"
-        )
-    elif valid_fraction < 1.0:
-        valid_size = int(round(data_size * valid_fraction, 0))
-        train_size = data_size - valid_size
-    else:
-        valid_size = data_size
-        train_size = data_size
-
-    site_sizes = split_num_proportion(train_size, num_sites, split_method)
-    split_data_indices = {
-        "valid": {"start": 0, "end": valid_size},
-    }
-    for site in range(num_sites):
-        site_id = site_name_prefix + str(site + 1)
-        if valid_fraction < 1.0:
-            idx_start = valid_size + sum(site_sizes[:site])
-            idx_end = valid_size + sum(site_sizes[: site + 1])
-        else:
-            idx_start = sum(site_sizes[:site])
-            idx_end = sum(site_sizes[: site + 1])
-        split_data_indices[site_id] = {"start": idx_start, "end": idx_end}
-
-    return split_data_indices
-
-
-def get_file_line_count(input_path: str) -> int:
-    count = 0
-    with open(input_path, "r") as fp:
-        for i, _ in enumerate(fp):
-            count += 1
-    return count
-
-
-def split_data(
-    data_path: str,
-    site_num: int,
-    data_size: int,
-    valid_frac: float,
-    site_name_prefix: str = "site-",
-    split_method: SplitMethod = SplitMethod.UNIFORM,
-):
-    size_total_file = get_file_line_count(data_path)
-    if data_size > 0:
-        if data_size > size_total_file:
-            raise ValueError(
-                "data_size should be less than or equal to the true data size"
-            )
-        else:
-            size_total = data_size
-    else:
-        size_total = size_total_file
-    site_indices = assign_data_index_to_sites(
-        size_total, valid_frac, site_num, site_name_prefix, split_method
-    )
-    return site_indices
-
 
 def _read_json(filename):
     if not os.path.isfile(filename):
@@ -181,7 +68,7 @@ def _write_json(data, filename):
 
 
 def _get_job_name(args) -> str:
-    return args.task_name + "_" + str(args.site_num) + "_" + args.split_method
+    return args.task_name + "_" + str(args.site_num)
 
 
 def _gen_deploy_map(num_sites: int, site_name_prefix: str) -> dict:
@@ -333,7 +220,6 @@ def main():
         args.site_name_prefix,
         args.data_size,
         args.valid_frac,
-        args.split_method,
         args.num_rounds,
     ]
     t2_input = DataSet("iJobConfig", [Element(to_dfanalyzer)])

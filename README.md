@@ -40,7 +40,7 @@ DfAnalyzer is a library designed to capture provenance data, which includes:
 
 5.  Install `dfa-lib-python`:
    ```bash
-   cd dfanalyzer/dfa-lib-python & make install
+   cd dfanalyzer/dfa-lib-python && make install
    ```
 6. Run the prospective provenance script:
    ```bash

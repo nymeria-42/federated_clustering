@@ -89,6 +89,10 @@ class DBSCANAssembler(Assembler):
             csgraph=global_connectivity, directed=False, return_labels=True
         )
 
+        # Preserve original client labels in metadata for traceability
+        # (core_labels_list now preserved in returned metadata)
+        self.client_labels_list = core_labels_list
+        
         return all_core_points, labels
 
     def get_model_params(self, dxo: DXO) -> dict:
