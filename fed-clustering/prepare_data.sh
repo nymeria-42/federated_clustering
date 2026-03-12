@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATASET_PATH="/tmp/nvflare/dataset/dataset.csv"
+DATASET_PATH="/tmp/nvflare/dataset/des.csv"
 script_dir="$( dirname -- "$0"; )";
 
 

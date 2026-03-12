@@ -29,8 +29,8 @@ def prepare_data(
         df = df.sample(frac=1, random_state=0).reset_index(drop=True)
 
     ids = (
-        df["coadd_object_id"].values
-        if "coadd_object_id" in df.columns
+        df["COADD_OBJECT_ID"].values
+        if "COADD_OBJECT_ID" in df.columns
         else np.arange(len(df))
     )
     # df = df.drop(columns=["coadd_object_id"], errors="ignore").astype(float)
@@ -40,7 +40,7 @@ def prepare_data(
     filename = filename if filename else "processed_data.csv"
     if file_format == "csv":
         file_path = os.path.join(output_dir, filename)
-        ids_df = pd.DataFrame(ids, columns=["coadd_object_id"])
+        ids_df = pd.DataFrame(ids, columns=["COADD_OBJECT_ID"])
         ids_df.to_csv(file_path, sep=",", index=False, header=True)
         df.to_csv(file_path, sep=",", index=False, header=False)
     else:
