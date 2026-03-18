@@ -107,8 +107,7 @@ class DBSCANAssembler(Assembler):
         # Save client data to file and store only the path in the analyzer
         saved_path = None
         try:
-            safe_hash = str(self.hash_trial).replace("/", "_")[:32]
-            filename = f"dbscan_client_{safe_hash}_r{self.current_round}.npz"
+            filename = f"dbscan_client_r{self.current_round}.npz"
 
             core_points = data.get("core_points", [])
             core_labels = data.get("core_labels", [])
